@@ -1,0 +1,15 @@
+<!doctype html>
+<title>Slurm usage</title>
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+<div class=page>
+
+    <h1>Slurm usage</h1>
+
+    <p>CPU core Inventory:</p>
+    <p>Total: {{ total }} </p>
+    <p>Running: {{running }}</p>
+    <p>Pending: {{ pending }}</p>
+    <p>&nbsp;</p>
+
+    {{ table|safe }}
+</div>
