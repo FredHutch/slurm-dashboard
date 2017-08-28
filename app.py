@@ -15,6 +15,9 @@ import pandas
 import paramiko
 import flask
 
+PARTITIONS_PER_ROW = 3
+ITEMS_TO_SHOW = 25
+
 def run_ssh_command(command):
     """
     Run an ssh command. The 'ssh' executable is not required
@@ -53,10 +56,38 @@ def is_at_home():
     return get_local_ip().startswith("192.168.")
 
 
+def get_data_for_partition(data, partition):
+    ids_to_remove = []
+    if not partition == "restart":
+        restart = data[data['PARTITION'] == 'restart']
+        ids_to_remove = restart['JOBID'].tolist()
+    data = data[data['PARTITION'] == partition]
+    data = data[~data['JOBID'].isin(ids_to_remove)]
+    return data
+
+def get_partitions(data):
+    partitions = sorted(data['PARTITION'].unique().tolist())
+    partitions.remove('campus')
+    partitions.remove('largenode')
+    partitions.insert(0, 'largenode')
+    partitions.insert(0, 'campus')
+    return partitions
+
+
+def get_stats_for_data(data, nodes, partition):
+    if partition == "campus":
+        partition = "campus*"
+    nodes = nodes[nodes['PARTITION'] == partition]
+
+
+    return dict(total=nodes.sum()["CPUS"],
+                running=data[data['ST'] == 'R'].sum()["CPUS"],
+                pending=int(data[data['ST'] == 'PD'].sum()["CPUS"]))
+
 def get_data(featurefilter='', partitionfilter=''):
     """Get the slurm usage data."""
-    squeuecmd = "squeue --format=%i;%t;%D;%C;%a;%u"
-    sinfocmd = "sinfo --format=%n;%c;%m;%f"
+    squeuecmd = "squeue --format=%i;%t;%D;%C;%u;%a;%P"
+    sinfocmd = "sinfo --format=%n;%c;%m;%f;%P"
 
     # TODO test this
     if partitionfilter != '':
@@ -82,25 +113,50 @@ def get_data(featurefilter='', partitionfilter=''):
     if featurefilter != '':
         nodes = nodes[(nodes['FEATURES'].str.contains(featurefilter))]
 
-    data = dict(table=jobs.groupby(["ACCOUNT", "USER"]).sum()["CPUS"].reset_index(name="CPUS"),
-                total=nodes.sum()["CPUS"],
-                running=jobs[jobs['ST'] == 'R'].sum()["CPUS"],
-                pending=jobs[jobs['ST'] == 'PD'].sum()["CPUS"])
 
-    return data
+    # df = jobs.groupby(["ACCOUNT", "USER", "PARTITION", "JOBID", "ST"]).\
+    #     sum()["CPUS"].reset_index(name="CPUS").sort_values("CPUS", 0, False)
+    # cols = df.columns.tolist()
+    # cols.insert(0, cols.pop(1))
+    # df = df[cols]
+
+    df = jobs.sort_values("CPUS", 0, False)
+
+    return df, nodes
 
 app = flask.Flask(__name__) # pylint: disable=invalid-name
+
+def rowstart(idx):
+    _, remainder = divmod(idx, PARTITIONS_PER_ROW)
+    return remainder == 0
+
+def rowend(idx):
+    _, remainder = divmod(idx, PARTITIONS_PER_ROW)
+    return remainder == (PARTITIONS_PER_ROW - 1)
 
 @app.route("/")
 def show_table():
     """Route for /, display slurm usage data as web page."""
-    all_data = get_data()
-    data = all_data['table']
-    html = data.to_html().replace("<table ", "<table id='slurm_table' ")
-    return flask.render_template('show_table.html', table=html,
-                                 total=all_data['total'],
-                                 running=all_data['running'],
-                                 pending=all_data['pending'])
+    jobs, nodes = get_data()
+    partitions = get_partitions(jobs)
+
+    tables = []
+    for idx, partition in enumerate(partitions):
+        # print("partition is {}".format(partition))
+        partition_jobs = get_data_for_partition(jobs, partition)
+        grouped = partition_jobs.groupby(["ACCOUNT", "USER"])\
+            .sum()["CPUS"].reset_index(name="CPUS").sort_values("CPUS", 0, False)
+        cols = grouped.columns.tolist()
+        cols.insert(0, cols.pop(1))
+        grouped = grouped[cols]
+        html = grouped.head(ITEMS_TO_SHOW).to_html(index=False)
+        html = html.replace("<table ", "<table id='slurm_table' ")
+        tables.append(dict(get_stats_for_data(partition_jobs, nodes, partition),
+                           table=html, partition=partition,
+                           rowstart=rowstart(idx),
+                           rowend=rowend(idx)))
+    return flask.render_template('show_table.html', tables=tables,
+                                 ITEMS_TO_SHOW=ITEMS_TO_SHOW)
 
 # Run me like this:
 # FLASK_APP=app.py FLASK_DEBUG=True flask run
