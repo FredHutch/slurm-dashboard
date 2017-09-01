@@ -159,12 +159,12 @@ def get_cluster_status(cluster=""):
     for idx, partition in enumerate(partitions):
         # print("partition is {}".format(partition))
         partition_jobs = get_data_for_partition(jobs, partition)
-        grouped = partition_jobs.groupby(["ACCOUNT", "USER"])\
+        grouped = partition_jobs.groupby(["ACCOUNT", "USER", "ST"])\
             .sum()["CPUS"].reset_index(name="CPUS").sort_values("CPUS", 0, False)
         cols = grouped.columns.tolist()
         cols.insert(0, cols.pop(1))
         grouped = grouped[cols]
-        
+
         html = grouped.head(ITEMS_TO_SHOW).to_html(index=False)
         html = html.replace("<table ", "<table id='slurm_table' ")
         tables.append(dict(get_stats_for_data(partition_jobs, nodes, partition),
