@@ -22,5 +22,6 @@ ENV FLASK_APP=app.py
 # REMOVE THIS LINE vvv before a real deployment
 ENV FLASK_DEBUG=True
 
-# TODO deploy with gunicorn
-CMD flask run -h 0.0.0.0
+EXPOSE 8000
+
+CMD ./run.sh

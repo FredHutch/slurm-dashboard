@@ -1,3 +1,4 @@
 slurmdashboard_rsa
 __pycache__
 *.pyc
+certs

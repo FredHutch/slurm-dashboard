@@ -1,0 +1,16 @@
+version: '2'
+
+services:
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./certs:/etc/nginx/certs
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+
+  dashboard:
+    image: fredhutch/scicomp-dashboard
+    environment:
+      - VIRTUAL_HOST=scicomp-dashboard.fhcrc.org
