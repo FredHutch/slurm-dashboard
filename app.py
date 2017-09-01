@@ -68,8 +68,9 @@ def get_data_for_partition(data, partition):
 def get_partitions(data):
     partitions = sorted(data['PARTITION'].unique().tolist())
     partitions.remove('campus')
-    partitions.remove('largenode')
-    partitions.insert(0, 'largenode')
+    if 'largenode' in partitions:
+        partitions.remove('largenode')
+        partitions.insert(0, 'largenode')
     partitions.insert(0, 'campus')
     return partitions
 
@@ -84,10 +85,10 @@ def get_stats_for_data(data, nodes, partition):
                 running=data[data['ST'] == 'R'].sum()["CPUS"],
                 pending=int(data[data['ST'] == 'PD'].sum()["CPUS"]))
 
-def get_data(featurefilter='', partitionfilter=''):
+def get_data(cluster, featurefilter='', partitionfilter=''):
     """Get the slurm usage data."""
-    squeuecmd = "squeue --format=%i;%t;%D;%C;%u;%a;%P"
-    sinfocmd = "sinfo --format=%n;%c;%m;%f;%P"
+    squeuecmd = "squeue {} --format=%i;%t;%D;%C;%u;%a;%P".format(cluster)
+    sinfocmd = "sinfo {} --format=%n;%c;%m;%f;%P".format(cluster)
 
     # TODO test this
     if partitionfilter != '':
@@ -97,11 +98,12 @@ def get_data(featurefilter='', partitionfilter=''):
         squeue_fh = open("squeue.txt")
         sinfo_fh = open("sinfo.txt")
     else:
-        squeue = run_ssh_command(squeuecmd)
-        sinfo = run_ssh_command(sinfocmd)
+        squeue = run_ssh_command(squeuecmd).replace("CLUSTER: beagle\n", "")
+        sinfo = run_ssh_command(sinfocmd).replace("CLUSTER: beagle\n", "")
         squeue_fh = StringIO(squeue)
         sinfo_fh = StringIO(sinfo)
 
+        # print("squeue:\n\n\n{}\n\n\nsinfo:\n\n\n{}".format(squeue, sinfo))
 
     jobs = pandas.read_table(squeue_fh, sep=';')
     nodes = pandas.read_table(sinfo_fh, sep=';')
@@ -135,9 +137,22 @@ def rowend(idx):
     return remainder == (PARTITIONS_PER_ROW - 1)
 
 @app.route("/")
-def show_table():
+def default_route():
+    return get_cluster_status()
+
+@app.route("/beagle")
+def beagle_route():
+    return get_cluster_status("beagle")
+
+def get_cluster_status(cluster=""):
     """Route for /, display slurm usage data as web page."""
-    jobs, nodes = get_data()
+    if cluster:
+        cluster_name = cluster
+        cluster = "-M {}".format(cluster)
+    else:
+        cluster_name = "gizmo"
+
+    jobs, nodes = get_data(cluster)
     partitions = get_partitions(jobs)
 
     tables = []
@@ -149,6 +164,7 @@ def show_table():
         cols = grouped.columns.tolist()
         cols.insert(0, cols.pop(1))
         grouped = grouped[cols]
+        
         html = grouped.head(ITEMS_TO_SHOW).to_html(index=False)
         html = html.replace("<table ", "<table id='slurm_table' ")
         tables.append(dict(get_stats_for_data(partition_jobs, nodes, partition),
@@ -156,7 +172,8 @@ def show_table():
                            rowstart=rowstart(idx),
                            rowend=rowend(idx)))
     return flask.render_template('show_table.html', tables=tables,
-                                 ITEMS_TO_SHOW=ITEMS_TO_SHOW)
+                                 ITEMS_TO_SHOW=ITEMS_TO_SHOW,
+                                 cluster_name=cluster_name)
 
 # Run me like this:
 # FLASK_APP=app.py FLASK_DEBUG=True flask run
