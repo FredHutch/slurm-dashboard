@@ -14,6 +14,8 @@ import socket
 import pandas
 import paramiko
 import flask
+import timeout_decorator
+
 
 PARTITIONS_PER_ROW = 3
 ITEMS_TO_SHOW = 25
@@ -57,6 +59,7 @@ def is_at_home():
 
 
 def get_data_for_partition(data, partition):
+    """Get data by partition"""
     ids_to_remove = []
     if not partition == "restart":
         restart = data[data['PARTITION'] == 'restart']
@@ -66,8 +69,12 @@ def get_data_for_partition(data, partition):
     return data
 
 def get_partitions(data):
+    """Get partitions from data"""
+    if data.size == 0:
+        return []
     partitions = sorted(data['PARTITION'].unique().tolist())
-    partitions.remove('campus')
+    if 'campus' in partitions:
+        partitions.remove('campus')
     if 'largenode' in partitions:
         partitions.remove('largenode')
         partitions.insert(0, 'largenode')
@@ -76,6 +83,7 @@ def get_partitions(data):
 
 
 def get_stats_for_data(data, nodes, partition):
+    """Return stats (total, running pending) for each partition"""
     if partition == "campus":
         partition = "campus*"
     nodes = nodes[nodes['PARTITION'] == partition]
@@ -85,6 +93,7 @@ def get_stats_for_data(data, nodes, partition):
                 running=data[data['ST'] == 'R'].sum()["CPUS"],
                 pending=int(data[data['ST'] == 'PD'].sum()["CPUS"]))
 
+@timeout_decorator.timeout(3, use_signals=False)
 def get_data(cluster, featurefilter='', partitionfilter=''):
     """Get the slurm usage data."""
     squeuecmd = "squeue {} --format=%i;%t;%D;%C;%u;%a;%P".format(cluster)
@@ -122,26 +131,30 @@ def get_data(cluster, featurefilter='', partitionfilter=''):
     # cols.insert(0, cols.pop(1))
     # df = df[cols]
 
-    df = jobs.sort_values("CPUS", 0, False)
+    df0 = jobs.sort_values("CPUS", 0, False)
 
-    return df, nodes
+    return df0, nodes
 
 app = flask.Flask(__name__) # pylint: disable=invalid-name
 
 def rowstart(idx):
+    """Determine if we are at the beginning of a row."""
     _, remainder = divmod(idx, PARTITIONS_PER_ROW)
     return remainder == 0
 
 def rowend(idx):
+    """Determine if we are at the end of a row."""
     _, remainder = divmod(idx, PARTITIONS_PER_ROW)
     return remainder == (PARTITIONS_PER_ROW - 1)
 
 @app.route("/")
 def default_route():
+    """Default flask route (/)"""
     return get_cluster_status()
 
 @app.route("/beagle")
 def beagle_route():
+    """Route for beagle info"""
     return get_cluster_status("beagle")
 
 def get_cluster_status(cluster=""):
@@ -152,7 +165,14 @@ def get_cluster_status(cluster=""):
     else:
         cluster_name = "gizmo"
 
-    jobs, nodes = get_data(cluster)
+    try:
+        jobs, nodes = get_data(cluster)
+    except timeout_decorator.TimeoutError:
+        jobs = pandas.DataFrame(columns=['JOBID', 'ST', 'NODES', 'CPUS', 'USER',
+                                         'ACCOUNT', 'PARTITION'])
+        nodes = pandas.DataFrame(columns=['HOSTNAMES', 'CPUS', 'MEMORY',
+                                          'FEATURES', 'PARTITION'])
+
     partitions = get_partitions(jobs)
 
     tables = []
