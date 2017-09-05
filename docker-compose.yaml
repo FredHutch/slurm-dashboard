@@ -11,6 +11,6 @@ services:
   #     - /var/run/docker.sock:/tmp/docker.sock:ro
 
   dashboard:
-    image: fredhutch/scicomp-dashboard
+    image: dockerimages.fhcrc.org/fredhutch/scicomp-dashboard
     environment:
       - VIRTUAL_HOST=scicomp-dashboard.fhcrc.org
