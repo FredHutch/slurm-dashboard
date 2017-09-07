@@ -8,13 +8,13 @@ dependencies:
     - curl -LO https://github.com/rancher/rancher-compose/releases/download/v0.12.5/rancher-compose-linux-amd64-v0.12.5.tar.gz
     - echo current directory is $(pwd)
     - tar zxf rancher-compose-linux-amd64-v0.12.5.tar.gz
-    # - sudo cp /tmp/rancher-compose-v0.12.5/rancher-compose /usr/local/bin/
+    - cp rancher-compose-v0.12.5/rancher-compose /usr/local/bin/
     - ls -lR
 
 test:
   override:
       - ls
-      # - docker run --rm -w /scicomp-dashboard $DOCKER_HUB_HOST/$DOCKER_USER/scicomp-dashboard:$CIRCLE_SHA1 python3 unit_tests.py
+      - docker run --rm -w /scicomp-dashboard $DOCKER_HUB_HOST/$DOCKER_USER/scicomp-dashboard:$CIRCLE_SHA1 python3 unit_tests.py
     # TODO add javascript testing here
 
 deployment:
