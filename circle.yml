@@ -4,7 +4,7 @@ machine:
 
 dependencies:
   override:
-    - docker build -f proxy.dockerfile -t $DOCKER_HUB_HOST/$DOCKER_USER/scicomp-dashboard-proxy:$CIRCLE_SHA1
+    - docker build -f proxy.dockerfile -t $DOCKER_HUB_HOST/$DOCKER_USER/scicomp-dashboard-proxy:$CIRCLE_SHA1 .
     - docker build --build-arg "SLURMDASHBOARD_RSA=$SLURMDASHBOARD_RSA" -t $DOCKER_HUB_HOST/$DOCKER_USER/scicomp-dashboard:$CIRCLE_SHA1 .
     - curl -LO https://github.com/rancher/rancher-compose/releases/download/v0.12.5/rancher-compose-linux-amd64-v0.12.5.tar.gz
     - echo current directory is $(pwd)
