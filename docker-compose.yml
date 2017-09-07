@@ -1,13 +1,6 @@
 version: '2'
 
 services:
-  scicomp-dashboard:
-    image: dockerimages.fhcrc.org/fredhutch/scicomp-dashboard-proxy
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - /var/run/docker.sock:/tmp/docker.sock:ro
 
   dashboard:
     image: dockerimages.fhcrc.org/fredhutch/scicomp-dashboard
@@ -15,5 +8,3 @@ services:
     # for testing.
     # ports:
     #   - "80:8000"
-    environment:
-      - VIRTUAL_HOST=scicomp-dashboard.fhcrc.org
