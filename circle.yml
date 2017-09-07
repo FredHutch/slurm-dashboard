@@ -4,6 +4,7 @@ machine:
 
 dependencies:
   override:
+    - docker build -f proxy.dockerfile -t $DOCKER_HUB_HOST/$DOCKER_USER/scicomp-dashboard-proxy:$CIRCLE_SHA1
     - docker build --build-arg "SLURMDASHBOARD_RSA=$SLURMDASHBOARD_RSA" -t $DOCKER_HUB_HOST/$DOCKER_USER/scicomp-dashboard:$CIRCLE_SHA1 .
     - curl -LO https://github.com/rancher/rancher-compose/releases/download/v0.12.5/rancher-compose-linux-amd64-v0.12.5.tar.gz
     - echo current directory is $(pwd)
@@ -21,6 +22,9 @@ deployment:
     branch: master
     commands:
       - ls
+      - docker tag $DOCKER_HUB_HOST/$DOCKER_USER/scicomp-dashboard-proxy:$CIRCLE_SHA1 $DOCKER_HUB_HOST/$DOCKER_USER/scicomp-dashboard-proxy:latest
       - docker tag $DOCKER_HUB_HOST/$DOCKER_USER/scicomp-dashboard:$CIRCLE_SHA1 $DOCKER_HUB_HOST/$DOCKER_USER/scicomp-dashboard:latest
-      - docker login -e fredhutch@fhcrc.org -u $DOCKER_USER -p "$DOCKER_PASS" $DOCKER_HUB_HOST && docker push $DOCKER_HUB_HOST/$DOCKER_USER/scicomp-dashboard:latest
-      - rancher-compose-v0.12.5/rancher-compose --project-name scicomp-dashboard --url https://ponderosa.fhcrc.org/v2-beta/projects/1a38/stacks/1st47  --access-key $RANCHERAPI_ACCESSKEY --secret-key $RANCHERAPI_SECRETKEY up -d --pull --force-upgrade --confirm-upgrade dashboard
+      - docker login -e fredhutch@fhcrc.org -u $DOCKER_USER -p "$DOCKER_PASS" $DOCKER_HUB_HOST
+      - docker push $DOCKER_HUB_HOST/$DOCKER_USER/scicomp-dashboard:latest
+      - docker push $DOCKER_HUB_HOST/$DOCKER_USER/scicomp-dashboard-proxy:latest
+      - rancher-compose-v0.12.5/rancher-compose --project-name scicomp-dashboard --url https://ponderosa.fhcrc.org/v2-beta/projects/1a38/stacks/1st47  --access-key $RANCHERAPI_ACCESSKEY --secret-key $RANCHERAPI_SECRETKEY up -d --pull --force-upgrade --confirm-upgrade

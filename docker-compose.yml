@@ -1,17 +1,18 @@
 version: '2'
 
 services:
-  # nginx-proxy:
-  #   image: jwilder/nginx-proxy
-  #   ports:
-  #     - "80:80"
-  #     - "443:443"
-  #   volumes:
-  #     - ./certs:/etc/nginx/certs
-  #     - /var/run/docker.sock:/tmp/docker.sock:ro
+  scicomp-dashboard:
+    image: dockerimages.fhcrc.org/fredhutch/scicomp-dashboard-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
 
   dashboard:
     image: dockerimages.fhcrc.org/fredhutch/scicomp-dashboard
+    # eventually get rid of the ports section here, it's just
+    # for testing.
     ports:
       - "80:8000"
     environment:
