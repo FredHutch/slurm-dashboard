@@ -23,4 +23,4 @@ deployment:
       - ls
       - docker tag $DOCKER_HUB_HOST/$DOCKER_USER/scicomp-dashboard:$CIRCLE_SHA1 $DOCKER_HUB_HOST/$DOCKER_USER/scicomp-dashboard:latest
       - docker login -e fredhutch@fhcrc.org -u $DOCKER_USER -p "$DOCKER_PASS" $DOCKER_HUB_HOST && docker push $DOCKER_HUB_HOST/$DOCKER_USER/scicomp-dashboard:latest
-      - rancher-compose-v0.12.5/rancher-compose --project-name scicomp-dashboard --url https://ponderosa.fhcrc.org/v2-beta/projects/1a38/services/1s52  --access-key $RANCHERAPI_ACCESSKEY --secret-key $RANCHERAPI_SECRETKEY up -d --pull --force-upgrade --confirm-upgrade scicomp-dashboard
+      - rancher-compose-v0.12.5/rancher-compose --project-name scicomp-dashboard --url https://ponderosa.fhcrc.org/v1/projects/1a38  --access-key $RANCHERAPI_ACCESSKEY --secret-key $RANCHERAPI_SECRETKEY up -d --pull --force-upgrade --confirm-upgrade scicomp-dashboard
