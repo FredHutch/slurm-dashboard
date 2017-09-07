@@ -6,7 +6,7 @@ dependencies:
   override:
     - docker build --build-arg "SLURMDASHBOARD_RSA=$SLURMDASHBOARD_RSA" -t $DOCKER_HUB_HOST/$DOCKER_USER/scicomp-dashboard:$CIRCLE_SHA1 .
     - curl -L https://github.com/rancher/rancher-compose/releases/download/v0.12.5/rancher-compose-linux-amd64-v0.12.5.tar.gz > /tmp/rancher-compose-linux-amd64-v0.12.5.tar.gz
-    - tar xvf /tmp/rancher-compose-linux-amd64-v0.12.5.tar.gz -C /tmp
+    - tar zxf /tmp/rancher-compose-linux-amd64-v0.12.5.tar.gz -C /tmp
     - cp /tmp/rancher-compose-v0.12.5/rancher-compose /usr/local/bin/
     # - echo current directory is $(pwd)
     - ls -lR
