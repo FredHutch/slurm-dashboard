@@ -12,7 +12,7 @@ dependencies:
 
 test:
   override:
-      - docker run --rm -e -w /app $DOCKER_HUB_HOST/$DOCKER_USER/scicomp-dashboard:$CIRCLE_SHA1 python3 unit_tests.py
+      - docker run --rm -e -w /scicomp-dashboard $DOCKER_HUB_HOST/$DOCKER_USER/scicomp-dashboard:$CIRCLE_SHA1 python3 unit_tests.py
     # TODO add javascript testing here
 
 deployment:
