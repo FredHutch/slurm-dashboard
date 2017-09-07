@@ -8,7 +8,6 @@ dependencies:
     - curl -LO https://github.com/rancher/rancher-compose/releases/download/v0.12.5/rancher-compose-linux-amd64-v0.12.5.tar.gz
     - echo current directory is $(pwd)
     - tar zxf rancher-compose-linux-amd64-v0.12.5.tar.gz
-    - cp rancher-compose-v0.12.5/rancher-compose /usr/local/bin/
     - ls -lR
 
 test:
@@ -24,4 +23,4 @@ deployment:
       - ls
 #       - docker tag $DOCKER_HUB_HOST/$DOCKER_USER/scicomp-dashboard:$CIRCLE_SHA1 $DOCKER_HUB_HOST/$DOCKER_USER/scicomp-dashboard:latest
 #       - docker login -e fredhutch@fhcrc.org -u $DOCKER_USER -p "$DOCKER_PASS" $DOCKER_HUB_HOST && docker push $DOCKER_HUB_HOST/$DOCKER_USER/scicomp-dashboard:latest
-#       - rancher-compose --project-name scicomp-dashboard --url https://ponderosa.fhcrc.org/v1/projects/1a38  --access-key $RANCHERAPI_ACCESSKEY --secret-key $RANCHERAPI_SECRETKEY up -d --pull --force-upgrade --confirm-upgrade scicomp-dashboard
+#       - rancher-compose-v0.12.5/rancher-compose --project-name scicomp-dashboard --url https://ponderosa.fhcrc.org/v1/projects/1a38  --access-key $RANCHERAPI_ACCESSKEY --secret-key $RANCHERAPI_SECRETKEY up -d --pull --force-upgrade --confirm-upgrade scicomp-dashboard
