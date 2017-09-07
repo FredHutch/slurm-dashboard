@@ -93,7 +93,7 @@ def get_stats_for_data(data, nodes, partition):
                 running=data[data['ST'] == 'R'].sum()["CPUS"],
                 pending=int(data[data['ST'] == 'PD'].sum()["CPUS"]))
 
-@timeout_decorator.timeout(3, use_signals=False)
+@timeout_decorator.timeout(5, use_signals=False)
 def get_data(cluster, featurefilter='', partitionfilter=''):
     """Get the slurm usage data."""
     squeuecmd = "squeue {} --format=%i;%t;%D;%C;%u;%a;%P".format(cluster)
