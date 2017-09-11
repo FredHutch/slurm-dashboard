@@ -25,7 +25,6 @@ def run_ssh_command(command):
     Run an ssh command. The 'ssh' executable is not required
     as this uses the pure-python paramiko library.
     """
-    # print("trying to run {}".format(command))
 
     username = 'dtenenba'
     # This key restricts users to squeue and sinfo commands,
@@ -40,7 +39,6 @@ def run_ssh_command(command):
     _, stdout, _ = ssh.exec_command(command)
     # TODO check for errors?
     ret = "".join(stdout.readlines())
-    # print("about to return: \n{}".format(ret))
     return ret
 
 
@@ -112,8 +110,6 @@ def get_data(cluster, featurefilter='', partitionfilter=''):
         squeue_fh = StringIO(squeue)
         sinfo_fh = StringIO(sinfo)
 
-        # print("squeue:\n\n\n{}\n\n\nsinfo:\n\n\n{}".format(squeue, sinfo))
-
     jobs = pandas.read_table(squeue_fh, sep=';')
     nodes = pandas.read_table(sinfo_fh, sep=';')
 
@@ -123,13 +119,6 @@ def get_data(cluster, featurefilter='', partitionfilter=''):
 
     if featurefilter != '':
         nodes = nodes[(nodes['FEATURES'].str.contains(featurefilter))]
-
-
-    # df = jobs.groupby(["ACCOUNT", "USER", "PARTITION", "JOBID", "ST"]).\
-    #     sum()["CPUS"].reset_index(name="CPUS").sort_values("CPUS", 0, False)
-    # cols = df.columns.tolist()
-    # cols.insert(0, cols.pop(1))
-    # df = df[cols]
 
     df0 = jobs.sort_values("CPUS", 0, False)
 
@@ -177,7 +166,6 @@ def get_cluster_status(cluster=""):
 
     tables = []
     for idx, partition in enumerate(partitions):
-        # print("partition is {}".format(partition))
         partition_jobs = get_data_for_partition(jobs, partition)
         grouped = partition_jobs.groupby(["ACCOUNT", "USER", "ST"])\
             .sum()["CPUS"].reset_index(name="CPUS").sort_values("CPUS", 0, False)
