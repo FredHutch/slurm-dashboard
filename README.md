@@ -15,7 +15,7 @@ But it's easy to add more functionality--just add a route in
 
 ## Deployment
 
-This app is deployed using our on-premises [CircleCI](https://circle.fhcrc.org)
+This app is [deployed](https://scicomp-dashboard.fhcrc.org/) using our on-premises [CircleCI](https://circle.fhcrc.org)
 and [Rancher](https://ponderosa.fhcrc.org)
 installations.
 
