@@ -89,8 +89,8 @@ def get_stats_for_data(data, nodes, partition):
     nodes = nodes[nodes['PARTITION'] == partition]
 
 
-    return dict(total=nodes.sum()["CPUS"],
-                running=data[data['ST'] == 'R'].sum()["CPUS"],
+    return dict(total=int(nodes.sum()["CPUS"]),
+                running=int(data[data['ST'] == 'R'].sum()["CPUS"]),
                 pending=int(data[data['ST'] == 'PD'].sum()["CPUS"]))
 
 @timeout_decorator.timeout(5, use_signals=False)
