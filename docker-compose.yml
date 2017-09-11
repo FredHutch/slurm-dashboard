@@ -4,7 +4,3 @@ services:
 
   dashboard:
     image: dockerimages.fhcrc.org/fredhutch/scicomp-dashboard
-    # eventually get rid of the ports section here, it's just
-    # for testing.
-    # ports:
-    #   - "80:8000"
