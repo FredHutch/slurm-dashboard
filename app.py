@@ -30,7 +30,7 @@ def run_ssh_command(command):
     # This key restricts users to squeue and sinfo commands,
     # see dashboard_wrapper.sh.
     key_file = 'slurmdashboard_rsa'
-    host = "rhino" # let DNS load-balance between different rhinos.
+    host = "rhino1" # don't let DNS round-robin until rhino3 is working again
 
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy()) # how bad is this?
