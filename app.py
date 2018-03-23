@@ -25,7 +25,6 @@ def run_ssh_command(command):
     Run an ssh command. The 'ssh' executable is not required
     as this uses the pure-python paramiko library.
     """
-
     username = 'dtenenba'
     # This key restricts users to squeue and sinfo commands,
     # see dashboard_wrapper.sh.
@@ -91,11 +90,11 @@ def get_stats_for_data(data, nodes, partition):
                 running=int(data[data['ST'] == 'R'].sum()["CPUS"]),
                 pending=int(data[data['ST'] == 'PD'].sum()["CPUS"]))
 
-@timeout_decorator.timeout(5, use_signals=False)
+@timeout_decorator.timeout(10, use_signals=False)
 def get_data(cluster, featurefilter='', partitionfilter=''):
     """Get the slurm usage data."""
-    squeuecmd = "squeue {} --format=%i;%t;%D;%C;%u;%a;%P".format(cluster)
-    sinfocmd = "sinfo {} --format=%n;%c;%m;%f;%P".format(cluster)
+    squeuecmd = "squeue {} --format=\"%i;%t;%D;%C;%u;%a;%P\"".format(cluster)
+    sinfocmd = "sinfo {} --format=\"%n;%c;%m;%f;%P\"".format(cluster)
 
     # TODO test this
     if partitionfilter != '':
@@ -105,8 +104,9 @@ def get_data(cluster, featurefilter='', partitionfilter=''):
         squeue_fh = open("squeue.txt")
         sinfo_fh = open("sinfo.txt")
     else:
-        squeue = run_ssh_command(squeuecmd).replace("CLUSTER: beagle\n", "")
-        sinfo = run_ssh_command(sinfocmd).replace("CLUSTER: beagle\n", "")
+        squeue = run_ssh_command(squeuecmd).replace("CLUSTER: beagle\n", "").replace("CLUSTER: gizmo\n", "").strip().replace('"', "")
+        sinfo = run_ssh_command(sinfocmd).replace("CLUSTER: beagle\n", "").replace("CLUSTER: gizmo\n", "").strip().replace('"', "")
+
         squeue_fh = StringIO(squeue)
         sinfo_fh = StringIO(sinfo)
 
@@ -121,7 +121,6 @@ def get_data(cluster, featurefilter='', partitionfilter=''):
         nodes = nodes[(nodes['FEATURES'].str.contains(featurefilter))]
 
     df0 = jobs.sort_values("CPUS", 0, False)
-
     return df0, nodes
 
 app = flask.Flask(__name__) # pylint: disable=invalid-name
