@@ -17,10 +17,12 @@ WORKDIR /scicomp-dashboard
 
 RUN echo $SLURMDASHBOARD_RSA | tr '~' '\n' > slurmdashboard_rsa && chmod 0400 slurmdashboard_rsa
 
-RUN pip3 install -r requirements.txt
+RUN pip3 install pipenv
 
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
+
+RUN pipenv install --system
 
 EXPOSE 8000
 
