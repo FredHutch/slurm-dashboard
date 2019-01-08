@@ -1,12 +1,9 @@
 [[source]]
-
 url = "https://pypi.python.org/simple"
 verify_ssl = true
 name = "pypi"
 
-
 [packages]
-
 astroid = "==1.5.2"
 isort = "==4.2.5"
 lazy-object-proxy = "==1.2.2"
@@ -15,17 +12,14 @@ pylint = "==1.7.1"
 pyparsing = "==2.2.0"
 wrapt = "==1.10.10"
 pandas = "*"
-flask = "*"
+flask = "==0.12.3"
 timeout-decorator = "*"
 gunicorn = "*"
-paramiko = "*"
-
+paramiko = "==2.4.2"
+cryptography = "==2.3"
 
 [dev-packages]
-
 ipython = "*"
 
-
 [requires]
-
 python_version = "3.6"
