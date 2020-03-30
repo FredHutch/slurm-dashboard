@@ -11,7 +11,7 @@ build_test:
         then
           docker stop scicomp-dashboard && docker rm --force scicomp-dashboard
         fi
-    - docker run --rm -w /scicomp-dashboard $DOCKER_HUB_HOST/$DOCKER_USER/scicomp-dashboard:$CIRCLE_SHA1 python3 unit_tests.py
+    - docker run --rm -w /scicomp-dashboard $DOCKER_HUB_HOST/$DOCKER_USER/scicomp-dashboard:latest python3 unit_tests.py
 
 
 deploy:
