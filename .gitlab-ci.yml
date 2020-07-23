@@ -5,7 +5,7 @@ before_script:
 
 build_test:
   script:
-    - docker build -t dockerimages.fhcrc.org/scicomp-dashboard:latest .
+    - docker build --build-arg "SLURMDASHBOARD_RSA=$SLURMDASHBOARD_RSA" -t dockerimages.fhcrc.org/scicomp-dashboard:latest .
     - |
         if docker ps -a|tr -s ' '|rev|cut -d ' ' -f 1|rev|grep -q scicomp-dashboard
         then
